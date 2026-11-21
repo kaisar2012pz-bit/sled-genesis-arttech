@@ -198,27 +198,107 @@ function scene(day,detail){
 }
 
 function archive(){
+  app.classList.add('landing');
   const intro=element('section','intro');
-  intro.append(element('h1','','Архив'),element('p','','Текст, фотографии и песня сохраняют то, как ощущался ваш день.'));
+  const introCopy=element('div','intro-copy');
+  introCopy.append(element('p','label','ЛИЧНЫЙ ДНЕВНИК ОЩУЩЕНИЙ · GENESIS ARTTECH'),
+    element('h1','','Некоторые дни остаются с нами.'));
+  intro.append(introCopy,element('p','intro-note','Возвращаем не только снимок, но и свет, звук и чувство целого дня.'));
   app.append(intro);
-  if(days.length) app.append(scene(days[0],false));
+
+  const actions=element('div','archive-actions');
+  const start=element('button','','Собрать новый день');
+  start.type='button';
+  start.onclick=()=>document.querySelector('#new').click();
+  actions.append(start,element('a','archive-jump','Открыть дневник ↓'));
+  app.append(actions);
+
+  if(days.length) {
+    const featured=scene(days[0],false);
+    featured.classList.add('hero-memory');
+    app.append(featured);
+  }
+  const thesis=element('section','thesis reveal');
+  thesis.id='about';
+  thesis.append(element('p','label','НЕ ПРОСТО ФОТОГРАФИЯ'),
+    element('h2','','Вспомнить, как это было — значит снова почувствовать.'));
+  const thesisNote=element('p','thesis-note','Дорожка, которую мы прошли. Музыка на фоне. Воздух перед дождём. Мы соединяем детали, чтобы вернуть атмосферу дня.');
+  thesis.append(thesisNote);
+  app.append(thesis);
+
+  const ritual=element('section','ritual reveal');
+  ritual.id='ritual';
+  const ritualHeader=element('div','sectionhead');
+  ritualHeader.append(element('h2','','День становится воспоминанием'),element('p','label','СЛОИ, ИЗ КОТОРЫХ ОН СОСТОИТ'));
+  ritual.append(ritualHeader);
+  const steps=element('div','ritual-grid');
+  const stepData=[
+    ['01','То, что запомнилось','Одна запись. Люди, погода и небольшая деталь, которая почему-то осталась с тобой.','✳'],
+    ['02','Свет, пойманный в кадре','Цвет и настроение фотографий становятся материалом для сцены.','◒'],
+    ['03','Песня, к которой вернёшься','Музыка задаёт ритм движения, глубину и свет воспоминания.','∿']
+  ];
+  for(const [number,title,copy,sign] of stepData){
+    const card=element('article','ritual-card');
+    card.append(element('span','ritual-mark',sign),element('p','label','СЛОЙ '+number),element('h3','',title),element('p','',copy));
+    steps.append(card);
+  }
+  ritual.append(steps);
+  const ritualAction=element('button','ritual-action','Записать этот день');
+  ritualAction.onclick=()=>document.querySelector('#new').click();
+  ritual.append(ritualAction);
+  app.append(ritual);
+
   const head=element('div','sectionhead');
-  head.append(element('h2','','Все дни'),element('p','label',String(days.length).padStart(2,'0')));
+  head.id='archive';
+  head.classList.add('archive-heading','reveal');
+  head.append(element('div','',undefined),element('p','label','ДНИ, К КОТОРЫМ МЫ ВОЗВРАЩАЕМСЯ · '+String(days.length).padStart(2,'0')));
+  head.firstElementChild.append(element('p','label','АРХИВ · GENESIS DIARY'),element('h2','','Моменты, которые стали твоими.'));
+  app.append(head);
   const grid=element('div','grid');
-  for(const day of days){
+  for(const [index,day] of days.entries()){
     const card=link('','#day/'+day.id,'card');
+    card.style.setProperty('--card-index',index);
+    card.setAttribute('aria-label',day.title+', '+dateLabel(day.date));
     styleScene(card,day.design);
+    const art=element('div','card-art');
     const img=element('img');
     img.src=source(day.photos[0]);
     img.alt='';
     img.loading='lazy';
-    card.append(img,element('span','label',dateLabel(day.date)+(day.demo?' · пример':'')),element('h3','',day.title));
+    img.decoding='async';
+    art.append(img);
+    const meta=element('div','card-meta');
+    meta.append(element('span','label',dateLabel(day.date)),element('span','label',day.demo?'ИСТОРИЯ':'МОЁ ВОСПОМИНАНИЕ'));
+    card.append(art,meta,element('h3','',day.title));
     grid.append(card);
   }
-  app.append(head,grid);
+  app.append(grid);
+  const end=element('section','closing-note reveal');
+  end.append(element('p','label','ТВОЯ ИСТОРИЯ ПРОДОЛЖАЕТСЯ'),
+    element('h2','','Не дай этому дню исчезнуть.'));
+  const last=element('button','', 'Сохранить день');
+  last.onclick=()=>document.querySelector('#new').click();
+  end.append(last);
+  app.append(end);
+  const observer=new IntersectionObserver(entries=>{
+    for(const entry of entries){
+      if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}
+    }
+  },{threshold:.12});
+  app.querySelectorAll('.reveal,.card').forEach(item=>observer.observe(item));
+  const heroStage=app.querySelector('.hero-memory .memory-stage');
+  if(heroStage){
+    const onScroll=()=>{
+      if(!document.body.contains(heroStage)){removeEventListener('scroll',onScroll);return;}
+      const rect=heroStage.getBoundingClientRect();
+      heroStage.style.setProperty('--scroll-depth',(Math.max(0,Math.min(1,(innerHeight-rect.top)/(innerHeight+rect.height)))*12).toFixed(1)+'px');
+    };
+    addEventListener('scroll',onScroll,{passive:true});
+    onScroll();
+  }
 }
-
 function detail(day){
+  app.classList.remove('landing');
   const root=element('article','detail');
   root.append(link('← Все дни','#archive','back'),scene(day,true));
   const info=element('div','info');
