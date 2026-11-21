@@ -18,6 +18,7 @@ let frame=0;
 let urls=[];
 let playTimer;
 let currentDay;
+let activeMemory;
 
 function dbOperation(db, mode, run) {
   return new Promise((resolve,reject)=>{
@@ -54,6 +55,85 @@ function link(text,href,cls){
   return a;
 }
 
+function animateMemory(section, stage, day) {
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+  const listeners=new AbortController();
+  const options={signal:listeners.signal};
+  let pointerX=0,pointerY=0,x=0,y=0,pulse=0,frameId=0;
+  let audio,context,analyser,spectrum;
+  let visible=false;
+  const style=stage.style;
+  function draw(){
+    frameId=0;
+    if(!visible || document.hidden || reduce.matches) return;
+    const rect=stage.getBoundingClientRect();
+    const scroll=Math.max(-1,Math.min(1,(innerHeight/2-rect.top-rect.height/2)/innerHeight));
+    x+=(pointerX-x)*.095;
+    y+=(pointerY-y)*.095;
+    let level=0;
+    if(analyser && !audio.paused && !audio.ended){
+      analyser.getByteFrequencyData(spectrum);
+      const step=context.sampleRate/analyser.fftSize;
+      const first=Math.max(1,Math.ceil(45/step));
+      const last=Math.floor(350/step);
+      for(let bin=first;bin<=last;bin++) level+=spectrum[bin];
+      level=Math.min(1,level/(Math.max(1,last-first+1)*195));
+    }else if(audio && !audio.paused && !audio.ended){
+      const beat=60/(day.design.bpm || 58+day.design.energy*82);
+      level=Math.exp(-((audio.currentTime%beat)/beat)*4)*.25;
+    }
+    pulse+=(level-pulse)*(level > pulse ? .31 : (.05 + day.design.energy*.2) * (day.design.lad==='minor' ? .65 : 1));
+    style.setProperty('--memory-rx',(-y*10+scroll*9).toFixed(2)+'deg');
+    style.setProperty('--memory-ry',(-8+x*15).toFixed(2)+'deg');
+    style.setProperty('--memory-pulse',pulse.toFixed(3));
+    style.setProperty('--memory-travel',(Math.max(0,scroll)*28+pulse*(17+day.design.energy*31)).toFixed(2)+'px');
+    frameId=requestAnimationFrame(draw);
+  }
+  function sync(){
+    cancelAnimationFrame(frameId);
+    frameId=0;
+    if(visible && !document.hidden && !reduce.matches) frameId=requestAnimationFrame(draw);
+  }
+  const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync();});
+  observer.observe(stage);
+  reduce.addEventListener('change',sync,options);
+  document.addEventListener('visibilitychange',sync,options);
+  stage.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch') return;
+    const rect=stage.getBoundingClientRect();
+    pointerX=(event.clientX-rect.left)/rect.width*2-1;
+    pointerY=(event.clientY-rect.top)/rect.height*2-1;
+  },options);
+  stage.addEventListener('pointerleave',()=>{pointerX=pointerY=0;},options);
+  return {
+    bindAudio(player,canAnalyze){
+      audio=player;
+      if(canAnalyze && window.AudioContext){
+        const enableSpectrum=()=>{
+          if(!context){
+            context=new AudioContext();
+            analyser=context.createAnalyser();
+            analyser.fftSize=2048;
+            spectrum=new Uint8Array(analyser.frequencyBinCount);
+            context.createMediaElementSource(player).connect(analyser);
+            analyser.connect(context.destination);
+          }
+          context.resume().catch(()=>{});
+        };
+        player.addEventListener('play',enableSpectrum,options);
+        section.querySelector('.memory-listen')?.addEventListener('click',enableSpectrum,options);
+      }
+    },
+    destroy(){
+      listeners.abort();
+      observer.disconnect();
+      cancelAnimationFrame(frameId);
+      audio?.pause();
+      if(context) context.close().catch(()=>{});
+    }
+  };
+}
+
 function scene(day,detail){
   const section=element('section','scene');
   styleScene(section,day.design);
@@ -64,7 +144,25 @@ function scene(day,detail){
   content.append(element('p','label',detail ? dateLabel(day.date) : 'Последняя запись · '+dateLabel(day.date)),
     element(detail?'h1':'h2','',day.title),
     element('p','caption',day.story.split(/[.!?\n]/).map(s=>s.trim()).filter(Boolean).slice(1,2)[0]?.concat('.') || day.story.slice(0,145)));
-  section.append(image,element('div','shading'),element('div','grain'),content);
+  const stage=element('div','memory-stage');
+  const layers=element('div','memory-layers');
+  const backing=element('div','memory-back');
+  const glass=element('div','memory-glass');
+  backing.setAttribute('aria-hidden','true');
+  glass.setAttribute('aria-hidden','true');
+  layers.append(backing,image,glass);
+  stage.append(layers);
+  const strength=day.design.energy;
+  section.style.setProperty('--memory-color','rgb('+day.design.tone+')');
+  section.style.setProperty('--memory-gap',(31+strength*58).toFixed(0)+'px');
+  section.style.setProperty('--memory-radius',(22-strength*20).toFixed(0)+'px');
+  section.dataset.lad=day.design.lad || '';
+  section.style.setProperty('--memory-grain',day.design.grain);
+  const lights={'Чёткий ритм':'line','Открытый горизонт':'horizon','Высокий воздух':'rise','Тихая пауза':'mist'};
+  section.dataset.light=lights[day.design.name] || 'soft';
+  if(detail && day.audio) content.append(element('button','memory-listen','Включить музыку'));
+  section.append(content,stage);
+  activeMemory=animateMemory(section,stage,day);
   if(!detail) content.append(link('Открыть воспоминание ↗','#day/'+day.id,'open'));
   if(detail && day.photos.length>1){
     const photos=day.photos.map(source);
@@ -74,7 +172,7 @@ function scene(day,detail){
       image.src=photos[index];
       image.alt='Фотография '+(index+1)+' из '+photos.length;
       image.getAnimations().forEach(animation=>animation.cancel());
-      if(!matchMedia('(prefers-reduced-motion: reduce)').matches) image.animate([{transform:'scale('+day.design.zoom+')'},{transform:'scale(1)'}],{duration:day.design.duration*1000});
+      if(!matchMedia('(prefers-reduced-motion: reduce)').matches) image.animate([{opacity:.5},{opacity:1}],{duration:240});
       controls.querySelectorAll('button[data-frame]').forEach((button,i)=>button.setAttribute('aria-pressed',i===index));
     };
     photos.forEach((_,i)=>{
@@ -158,6 +256,19 @@ function detail(day){
     audio.src=day.audio?source(day.audio):remote.href;
     audio.setAttribute('aria-label','Песня дня');
     sound.append(audio);
+    activeMemory.bindAudio(audio, Boolean(day.audio));
+    const listen=root.querySelector('.memory-listen');
+    if(listen){
+      listen.type='button';
+      listen.onclick=()=>{
+        if(!audio.paused){audio.pause();return;}
+        audio.play().catch(()=>{listen.textContent='Повторить запуск музыки';});
+      };
+      audio.addEventListener('play',()=>{listen.textContent='Пауза';});
+      for(const event of ['pause','ended']){
+        audio.addEventListener(event,()=>{listen.textContent='Включить музыку';});
+      }
+    }
   } else if(spotifyTrack) {
     const activate=element('button','plain','Загрузить плеер Spotify');
     activate.onclick=()=>{
@@ -182,6 +293,9 @@ function detail(day){
     element('p','',d.name+'. '+d.reason),
     element('p','','Средний оттенок снимков RGB '+d.tone+' задаёт цвет тени. Яркость снимков влияет на контраст.'),
     element('p','','Источник ритма — '+d.basis+'. Энергия '+Math.round(d.energy*100)+' из 100. Движение кадра длится '+d.duration+' с. Энергия также влияет на масштаб, насыщенность и контраст.'));
+  if(d.bpm || d.lad) disclosure.append(element('p','',
+    [d.bpm ? 'Указанный темп — '+d.bpm+' BPM, используется для движения без доступа к спектру.' : '',
+      d.lad ? (d.lad==='minor' ? 'Минор смягчает свет и продлевает затухание.' : 'Мажор усиливает свет.') : ''].filter(Boolean).join(' ')));
   sound.append(disclosure);
   info.append(words,sound);
   root.append(info);
@@ -189,6 +303,8 @@ function detail(day){
 }
 
 function render(){
+  activeMemory?.destroy();
+  activeMemory=undefined;
   clearInterval(playTimer);
   playTimer=undefined;
   window.speechSynthesis?.cancel();
@@ -239,6 +355,8 @@ form.onsubmit=async event=>{
     photos.forEach(photo=>temp.push(URL.createObjectURL(photo)));
     const profile=await audioProfile(audio,track,data.get('energy'));
     const design=await designFor(story,temp,profile).catch(()=>{throw new Error('Не удалось прочитать снимок. Попробуйте JPG, PNG или WebP.');});
+    design.bpm=Number(data.get('bpm')) || null;
+    design.lad=data.get('lad') || '';
     const day={id:crypto.randomUUID(),date:data.get('date'),story,title:titleFor(story),photos,audio,url,track,design};
     await dbOperation(await dbPromise,'readwrite',store=>store.put(day));
     days.push(day);
@@ -271,4 +389,3 @@ try{
   app.append(document.querySelector('#error').content.cloneNode(true));
   console.error(error);
 }
-

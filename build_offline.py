@@ -17,6 +17,7 @@ app = read("app.js").split("\n", 1)[1]
 app = app.replace("'media/'+name+'.jpg'", "offlineMedia[name+'.jpg']")
 app = app.replace("'media/'+item.id+'.wav'", "offlineMedia[item.id+'.wav']")
 html = read("index.html").replace('<link rel="stylesheet" href="style.css">', "<style>"+read("style.css")+"</style>")
+html = html.replace('<link rel="stylesheet" href="memory.css">', "<style>"+read("memory.css")+"</style>")
 script = "<script type='module'>\nconst offlineMedia = "+json.dumps(media)+";\n"+engine+"\n"+app+"\n</script>"
 html = html.replace('<script type="module" src="app.js"></script>', script)
 (root / "Sled.html").write_text(html, encoding="utf-8")

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Личный дневник, который превращает текст, снимки и музыку в атмосферу дня."><link rel="icon" href="data:,"><title>След — дневник ощущений</title><link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Личный дневник, который превращает текст, снимки и музыку в атмосферу дня."><link rel="icon" href="data:,"><title>След — дневник ощущений</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="memory.css"><script type="module" src="app.js"></script></head>
 <body>
 <header class="shell top"><a class="brand" href="#archive"><span class="mark">◉</span> след<span class="dot">.</span></a><nav aria-label="Дневник"><a class="navlink" href="#archive">Архив</a><button id="new" type="button">＋ Новый день</button></nav></header>
 <main class="shell" id="app"></main>
@@ -14,10 +14,10 @@
 <label>Или ссылка на песню (Spotify, аудиофайл или другой сервис) <input name="url" type="url" placeholder="https://…"></label>
 <label>Название, исполнитель или жанр <input name="track" maxlength="120" placeholder="Например, тихий джаз"></label>
 <label>Как звучит песня? <select name="energy"><option value="auto">Определить по аудио или описанию</option><option value="soft">Тихо и медленно</option><option value="mid">Ровно и спокойно</option><option value="fast">Ярко и энергично</option></select></label>
+<label>Темп, BPM (необязательно) <input name="bpm" type="number" min="40" max="220" step="1" placeholder="Например, 120"></label>
+<label>Лад (необязательно) <select name="lad"><option value="">Не указан</option><option value="major">Мажор</option><option value="minor">Минор</option></select></label>
 </fieldset>
 <p id="message" role="status"></p><button id="submit">Собрать воспоминание →</button>
 </form></dialog>
 <template id="error"><p role="alert">Архив недоступен. Разрешите хранилище для этой страницы и обновите её.</p></template>
 </body></html>
-
-

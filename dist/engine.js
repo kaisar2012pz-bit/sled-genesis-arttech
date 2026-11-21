@@ -18,7 +18,7 @@ export function titleFor(story) {
   const score = words => words.reduce((sum, word) => sum + (common.test(word) ? -1 : word.length > 3 ? 2 : 0), 0)
     - (words[0].length < 2 || common.test(words[0]) ? 2 : 0)
     - (words.at(-1).length < 3 || common.test(words.at(-1)) ? 3 : 0);
-  const first = phrases[0]?.trim().split(/\s+/u) || [];
+  const first = phrases[0]?.match(/[\p{L}\p{N}]+(?:[-–][\p{L}\p{N}]+)*/gu) || [];
   const best = first.length >= 3 && first.length <= 7 ? first : candidates.sort((a,b) => score(b) - score(a))[0];
   const short = (story.match(/[\p{L}\p{N}]+/gu) || []).slice(0,2);
   const title = best?.join(' ') || (short.length ? 'День в деталях — ' + short.join(' ') : 'День в деталях');
@@ -94,4 +94,3 @@ export const demos = [
   {id:'mountain',date:'2026-08-23',story:'Первый рассвет над горной тропой. Подъём начался в темноте. У вершины облака остались внизу, и стало слышно только дыхание.',photos:['mountain'],track:'Подъём — лёгкое арпеджио',energy:'mid'},
   {id:'rain',date:'2026-07-05',story:'Мелкий дождь за открытым окном. Вода стекала по стеклу тихими ручейками. На подоконнике остывал чай.',photos:['rain'],track:'Окно — тихий эмбиент',energy:'soft'}
 ];
-

@@ -1,0 +1,24 @@
+/* CSS 3D contact print shared by the archive hero and every saved day. */
+.scene{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);align-items:center;gap:16px;min-height:495px;padding:38px clamp(24px,5vw,75px);background:#1d211a}
+.scene:before{z-index:0}
+.scene .scene-content{width:100%;padding:0;z-index:2;min-width:0}
+.scene .visual{position:relative;display:block;height:100%;width:100%;border-radius:var(--memory-radius);border:1px solid #fff6cf80;animation:none;transform:translateZ(0);box-shadow:0 12px 30px #03040299}
+.scene h2,.detail .scene h1{font-size:clamp(40px,5.7vw,88px);overflow-wrap:anywhere}
+.detail .scene{min-height:clamp(440px,52vw,615px);padding-bottom:60px}
+.detail .scene-content{padding-bottom:0}
+.memory-stage{--memory-rx:0deg;--memory-ry:-8deg;--memory-pulse:0;--memory-travel:0px;min-width:0;display:grid;place-items:center;perspective:950px;isolation:isolate;height:clamp(295px,37vw,480px);background:radial-gradient(ellipse at center,color-mix(in srgb,var(--memory-color) 27%,transparent),transparent 70%)}
+.memory-layers{width:82%;aspect-ratio:1.36;position:relative;transform-style:preserve-3d;transform:rotateX(var(--memory-rx)) rotateY(var(--memory-ry))}
+.memory-back,.memory-glass{position:absolute;inset:0;border:1px solid color-mix(in srgb,var(--memory-color) 64%,#ffedc4);border-radius:var(--memory-radius);pointer-events:none}
+.memory-back{transform:translate3d(-7%,6%,calc(-1 * var(--memory-gap)));background:color-mix(in srgb,var(--memory-color) 65%,#171b16)}
+.memory-glass{transform:translate3d(4%,-5%,calc(var(--memory-gap) + var(--memory-travel)));background:radial-gradient(ellipse at 86% 14%,color-mix(in srgb,var(--memory-color) 47%,#ffe8ad),transparent 73%);opacity:calc(.28 + .62 * var(--memory-pulse));mix-blend-mode:screen}
+[data-light=line] .memory-glass{background:linear-gradient(128deg,transparent 64%,color-mix(in srgb,var(--memory-color) 45%,#bedcff) 69%,transparent 76%)}
+[data-lad=minor] .memory-glass{filter:saturate(.8)}
+[data-lad=major] .memory-glass{filter:brightness(1.19)}
+.memory-listen{margin-top:20px}
+@media(max-width:760px){.scene{grid-template-columns:minmax(0,1fr);gap:4px;padding:25px 25px 28px}.detail .scene{padding-bottom:78px}.memory-stage{height:clamp(225px,65vw,415px)}.scene h2,.detail .scene h1{font-size:clamp(38px,9.5vw,63px)}}
+@media(prefers-reduced-motion:reduce){.memory-layers{transform:rotateY(-8deg)}.memory-glass{transform:translate3d(4%,-5%,var(--memory-gap));opacity:.28}}
+
+.memory-glass::after{content:"";position:absolute;inset:0;border-radius:inherit;background:repeating-linear-gradient(0deg,#fff6 0 1px,transparent 1px 4px);opacity:var(--memory-grain,.2)}
+[data-light=horizon] .memory-glass{background:linear-gradient(0deg,transparent 32%,color-mix(in srgb,var(--memory-color) 42%,#e0f1e8) 43%,transparent 64%)}
+[data-light=rise] .memory-glass{background:radial-gradient(ellipse at 24% 7%,color-mix(in srgb,var(--memory-color) 55%,#e3faff),transparent 62%)}
+[data-light=mist] .memory-glass{background:radial-gradient(ellipse at 52% 44%,color-mix(in srgb,var(--memory-color) 64%,#cfdfec),transparent 87%)}
