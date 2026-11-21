@@ -47,3 +47,7 @@ HTML, CSS, JavaScript, Canvas 2D, IndexedDB, Web Audio API и Speech Synthesis A
 - [Документация GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 - [Документация плеера Spotify](https://developer.spotify.com/documentation/embeds/tutorials/creating-an-embed)
 
+
+## Стартовая CSS 3D-сцена
+
+[Контактный отпечаток](https://kaisar2012pz-bit.github.io/sled-genesis-arttech/3d.html) — отдельный интерактивный MVP с двумя днями и реакцией на спектр музыки. Для локальной проверки откройте /3d.html на том же сервере. [Концепция и план интеграции](CONCEPT-3D.md).

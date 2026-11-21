@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>След — контактный отпечаток</title>
+<link rel="icon" href="data:,"><link rel="stylesheet" href="diary-3d.css">
+<script src="diary-3d.js" defer></script>
+</head>
+<body>
+<header><a href="index.html">◉ след.</a><a href="index.html#archive">Архив дневника</a></header>
+<main>
+<section class="exhibit" aria-labelledby="title">
+  <div class="description">
+    <div class="choices" role="group" aria-label="Выбор дня">
+      <button type="button" data-day="park" aria-pressed="true">Осенний вечер</button>
+      <button type="button" data-day="office" aria-pressed="false">Ночной дедлайн</button>
+    </div>
+    <p class="date"><time id="date" datetime="2026-10-18">18 октября 2026</time></p>
+    <h1 id="title">Осенний парк и тёплое какао</h1>
+    <p id="caption">Листья хрустели под ногами, а бумажный стакан грел ладони.</p>
+    <button id="listen" type="button">Включить музыку</button>
+    <p id="status" role="status"></p>
+    <a id="folder" href="index.html#day/park">Открыть папку дня</a>
+    <audio id="song" src="media/park.wav" preload="metadata"></audio>
+  </div>
+  <figure id="stage" class="stage">
+    <div class="artifact">
+      <div class="plate back" aria-hidden="true"></div>
+      <img class="plate photo" id="photo" src="media/park.jpg" alt="Осенняя дорога среди деревьев" width="780" height="590">
+      <div class="plate front" aria-hidden="true"><div class="light"></div></div>
+    </div>
+    <figcaption>Контактный отпечаток · <span id="track">Какао</span></figcaption>
+  </figure>
+</section>
+<section class="notes" aria-labelledby="rules">
+  <h2 id="rules">Как день стал сценой</h2>
+  <p id="reason">Рассеянный свет и небольшой зазор между слоями оставляют в кадре ощущение близости. Низкие частоты слегка разводят пластины, свет плавно возвращается.</p>
+  <p>Поверните отпечаток курсором или прокрутите страницу, чтобы увидеть глубину. Музыка запускается по кнопке.</p>
+</section>
+</main>
+</body>
+</html>
