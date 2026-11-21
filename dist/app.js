@@ -231,11 +231,19 @@ function detail(day){
       if(speechSynthesis.speaking){speechSynthesis.cancel();speak.setAttribute('aria-pressed','false');return;}
       const voice=new SpeechSynthesisUtterance(day.story);
       voice.lang='ru-RU';
-      voice.rate=.76+day.design.energy*.42;
+      voice.rate=.78+day.design.energy*.2;
       voice.pitch=day.design.pitch;
-      const russian=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith('ru'));
-      if(russian) voice.voice=russian;
-      voice.onend=voice.onerror=()=>speak.setAttribute('aria-pressed','false');
+      const available=speechSynthesis.getVoices();
+      const russian=available.filter(item=>item.lang.toLowerCase().startsWith('ru'));
+      const selected=russian.find(item=>/irina|dmitry|dmitri|yuri|russian/i.test(item.name))
+        || russian.find(item=>item.default)
+        || russian[0];
+      if(selected) voice.voice=selected;
+      speak.textContent=selected ? 'Озвучка · '+selected.name : 'Озвучка · голос браузера';
+      voice.onend=voice.onerror=()=>{
+        speak.setAttribute('aria-pressed','false');
+        speak.textContent='Озвучить запись';
+      };
       speak.setAttribute('aria-pressed','true');
       speechSynthesis.speak(voice);
     };

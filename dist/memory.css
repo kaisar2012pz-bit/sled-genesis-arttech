@@ -22,3 +22,9 @@
 [data-light=horizon] .memory-glass{background:linear-gradient(0deg,transparent 32%,color-mix(in srgb,var(--memory-color) 42%,#e0f1e8) 43%,transparent 64%)}
 [data-light=rise] .memory-glass{background:radial-gradient(ellipse at 24% 7%,color-mix(in srgb,var(--memory-color) 55%,#e3faff),transparent 62%)}
 [data-light=mist] .memory-glass{background:radial-gradient(ellipse at 52% 44%,color-mix(in srgb,var(--memory-color) 64%,#cfdfec),transparent 87%)}
+
+@keyframes memory-arrive{0%{opacity:.2;transform:translate3d(0,16px,-28px) rotateX(-3deg) scale(.985)}100%{opacity:1;transform:translate3d(0,0,0) rotateX(0) scale(1)}}
+@keyframes memory-float{0%,100%{transform:rotateX(var(--memory-rx)) rotateY(var(--memory-ry)) translateY(0)}50%{transform:rotateX(var(--memory-rx)) rotateY(var(--memory-ry)) translateY(-5px)}}
+.memory-layers{animation:memory-arrive 1.05s cubic-bezier(.2,.72,.23,1) both,memory-float 8s ease-in-out 1.05s infinite}
+.detail .memory-layers{animation-duration:1.05s,8s}
+@media(prefers-reduced-motion:reduce){.memory-layers,.detail .memory-layers{animation:none}}
