@@ -5,6 +5,36 @@ const editor=document.querySelector('#editor');
 const form=document.querySelector('#entry');
 const message=document.querySelector('#message');
 const submit=document.querySelector('#submit');
+const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
+const finePointer=matchMedia('(hover: hover) and (pointer: fine)');
+const cursor=document.createElement('div');
+cursor.className='cursor-glow';
+cursor.setAttribute('aria-hidden','true');
+document.body.append(cursor);
+document.addEventListener('pointermove',event=>{
+  if(!finePointer.matches || motionPreference.matches || event.pointerType==='touch') return;
+  cursor.classList.add('cursor-visible');
+  cursor.style.setProperty('--cursor-x',event.clientX+'px');
+  cursor.style.setProperty('--cursor-y',event.clientY+'px');
+  const interactive=event.target.closest('a,button,summary,input,textarea,select');
+  cursor.classList.toggle('cursor-active',Boolean(interactive));
+  const card=event.target.closest('.card');
+  if(card){
+    const rect=card.getBoundingClientRect();
+    card.style.setProperty('--mx',((.5-(event.clientY-rect.top)/rect.height)*9).toFixed(2)+'deg');
+    card.style.setProperty('--my',(((event.clientX-rect.left)/rect.width-.5)*9).toFixed(2)+'deg');
+    card.style.setProperty('--spot-x',((event.clientX-rect.left)/rect.width*100).toFixed(1)+'%');
+    card.style.setProperty('--spot-y',((event.clientY-rect.top)/rect.height*100).toFixed(1)+'%');
+  }
+},{passive:true});
+document.addEventListener('pointerout',event=>{
+  const card=event.target.closest('.card');
+  if(card && !card.contains(event.relatedTarget)){
+    card.style.setProperty('--mx','0deg');
+    card.style.setProperty('--my','0deg');
+  }
+  if(!event.relatedTarget) cursor.classList.remove('cursor-visible','cursor-active');
+});
 const dates=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
 const dateLabel=date=>dates.format(new Date(date+'T12:00:00Z')).replace(' г.','');
 const dbPromise=new Promise((resolve,reject)=>{

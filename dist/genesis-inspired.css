@@ -89,3 +89,25 @@ form label{display:grid;gap:5px;margin:11px 0;font-size:14px}input,textarea,sele
 .day-outro h2{max-width:750px;font-size:clamp(42px,6vw,80px);margin:18px 0 26px}
 .day-outro .back{margin-left:24px}
 @media(max-width:760px){.day-heading{padding-bottom:26px}.day-heading h1{font-size:clamp(54px,11vw,78px)}.day-intro{margin-left:0}.detail .scene{min-height:0}.detail .panel{padding:23px}.day-outro{margin-top:55px}}
+
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .cursor-glow{position:fixed;z-index:99;left:0;top:0;width:30px;height:30px;pointer-events:none;border:1px solid #caff68;border-radius:50%;opacity:0;transform:translate3d(calc(var(--cursor-x,0px) - 50%),calc(var(--cursor-y,0px) - 50%),0);transition:width .25s,height .25s,opacity .25s,background .25s;box-shadow:0 0 18px #b7ff3260;mix-blend-mode:screen}
+ .cursor-glow:after{content:"";position:absolute;inset:12px;background:#d6ff9b;border-radius:50%}
+ .cursor-glow.cursor-visible{opacity:.9}
+ .cursor-glow.cursor-active{width:48px;height:48px;background:#b7ff3224}
+ .cursor-glow.cursor-active:after{inset:21px}
+ .card{transform-style:preserve-3d}
+ .card-art:after{background:radial-gradient(circle at var(--spot-x,50%) var(--spot-y,50%),#fff5,transparent 42%);mix-blend-mode:screen}
+ .card:hover .card-art img{transform:scale(1.09) translate3d(0,0,12px)}
+ .ritual-card:hover .ritual-mark{transform:rotate(90deg) scale(1.2);color:var(--pink)}
+ .ritual-mark{transition:transform .65s cubic-bezier(.2,.7,.3,1),color .4s}
+}
+@media (prefers-reduced-motion:no-preference){
+ .hero-memory .memory-glass{animation:light-breathe 5s ease-in-out infinite alternate}
+ .hero-memory .memory-back{animation:layer-float 7s ease-in-out infinite alternate}
+ .intro-copy{animation:headline-arrive 1s cubic-bezier(.2,.7,.3,1) both}
+ .intro-note,.archive-actions{animation:headline-arrive 1s .15s cubic-bezier(.2,.7,.3,1) both}
+ @keyframes light-breathe{from{filter:brightness(.85)}to{filter:brightness(1.3)}}
+ @keyframes layer-float{from{translate:0 0}to{translate:-4px 5px}}
+ @keyframes headline-arrive{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+}
