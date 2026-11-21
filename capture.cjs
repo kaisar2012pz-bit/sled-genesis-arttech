@@ -25,6 +25,8 @@ const title = 'Осенний парк и тёплое какао';
     await localAssets(page);
     const base=process.env.SLED_OFFLINE ? require('node:url').pathToFileURL(path.join(__dirname,'Sled.html')).href : 'http://127.0.0.1:8765/';
     await page.goto(base);
+    await page.waitForFunction(()=>document.body.classList.contains('ready'),null,{timeout:15000});
+    await page.locator('.memory-stage').waitFor();
     await page.locator('.card').first().waitFor();
     assert.equal(await page.locator('.card').count(),5);
     async function capture(number,caption){
@@ -33,14 +35,15 @@ const title = 'Осенний парк и тёплое какао';
         const bar=document.createElement('div');
         bar.id='video-caption';
         bar.textContent=text;
-        bar.style.cssText='position:fixed;bottom:0;left:0;right:0;padding:13px 28px;min-height:50px;background:#151711;color:#f8efdb;z-index:999;font:600 21px Segoe UI;pointer-events:none;border-top:1px solid #a09b70;text-align:center;';
+        bar.style.cssText='position:fixed;bottom:0;left:0;right:0;padding:13px 28px;min-height:50px;background:#1d1530;color:#f4eeff;z-index:999;font:600 21px Segoe UI;pointer-events:none;border-top:1px solid #b7ff32;text-align:center;';
         (document.querySelector('dialog[open]') || document.body).append(bar);
       },caption);
       await page.screenshot({path:path.join(staging,number+'.png')});
       await page.locator('#video-caption').evaluate(el=>el.remove());
     }
+    await page.locator(".loadscreen").waitFor({state:"hidden"});
     await capture(1,'СЛЕД · личный дневник ощущений');
-    await page.getByRole('button',{name:'Новый день'}).click();
+    await page.locator('#new').click();
     await page.locator('[name=date]').fill('2026-11-21');
     await page.locator('[name=story]').fill(title+'. Листья хрустели под ногами, а бумажный стакан грел ладони.');
     await page.locator('[name=photos]').setInputFiles([path.join(media,'park.jpg'),path.join(media,'rain.jpg')]);
@@ -51,7 +54,7 @@ const title = 'Осенний парк и тёплое какао';
     await page.getByRole('button',{name:'Собрать воспоминание'}).click();
     await page.waitForURL(/#day\//);
     const saved=page.url();
-    assert.equal(await page.locator('.detail h1').textContent(),title);
+    assert.equal(await page.locator('.scene h1').textContent(),title);
     await capture(3,'Папка получила название из записи. Цвет и движение зависят от снимков и музыки.');
     await page.getByRole('button',{name:'Фотография 2',exact:true}).click();
     assert.equal(await page.locator('.detail .visual').getAttribute('alt'),'Фотография 2 из 2');
@@ -69,27 +72,29 @@ const title = 'Осенний парк и тёплое какао';
     assert.match(await page.locator('details').textContent(),/громкость и выраженность/);
     await capture(5,'В папке остались текст и песня. Здесь же видно, какие данные изменили оформление.');
     await page.reload();
-    await page.locator('.detail h1').waitFor();
+    await page.locator('.detail .scene h1').waitFor();
     assert.equal(page.url(),saved);
-    await page.getByRole('link',{name:'Все дни'}).click();
+    await page.getByRole('link',{name:'Все воспоминания'}).click();
     assert.equal(await page.locator('.card').count(),6);
-    await page.locator('.sectionhead').scrollIntoViewIfNeeded();
+    await page.locator('#archive').scrollIntoViewIfNeeded();
     await capture(6,'Возвращаемся в архив. После перезагрузки новый день остался в дневнике.');
     for (const id of ['park','office','sea','mountain','rain']) {
       await page.goto(base+'#day/'+id);
-      await page.locator('.detail h1').waitFor();
+      await page.locator('.detail .scene h1').waitFor();
       await page.locator('.visual').evaluate(el=>el.decode());
       await page.screenshot({path:path.join(out,'examples',id+'.png'),fullPage:true});
     }
     await page.goto(base+'#day/office');
-    await page.locator('.detail h1').waitFor();
+    await page.locator('.detail .scene h1').waitFor();
     await capture(7,'У ночи перед сдачей резче свет, выше контраст и быстрее движение.');
     await page.goto(base+'#day/sea');
-    await page.locator('.detail h1').waitFor();
+    await page.locator('.detail .scene h1').waitFor();
     await capture(8,'У берега мягче фактура и больше пространства для горизонта.');
     await page.goto(base+'#archive');
+    await page.waitForFunction(()=>document.body.classList.contains('ready'),null,{timeout:15000});
+    await page.locator('.memory-stage').waitFor();
     await page.locator('.card').first().waitFor();
-    await page.getByRole('button',{name:'Новый день'}).click();
+    await page.locator('#new').click();
     await page.locator('[name=story]').fill('Мелкий дождь за открытым окном.');
     await page.locator('[name=photos]').setInputFiles(path.join(media,'rain.jpg'));
     await page.locator('[name=url]').fill('https://example.com/song');
@@ -99,8 +104,8 @@ const title = 'Осенний парк и тёплое какао';
     assert.equal(await page.getByRole('link',{name:'Открыть песню'}).getAttribute('href'),'https://example.com/song');
     assert.match(await page.locator('details').textContent(),/86 из 100/);
     async function addTrackLink(url) {
-      await page.getByRole('link',{name:'Все дни'}).click();
-      await page.getByRole('button',{name:'Новый день'}).click();
+      await page.getByRole('link',{name:'Все воспоминания'}).click();
+      await page.locator('#new').click();
       await page.locator('[name=story]').fill('Утро на пустом берегу.');
       await page.locator('[name=photos]').setInputFiles(path.join(media,'sea.jpg'));
       await page.locator('[name=url]').fill(url);
@@ -119,13 +124,9 @@ const title = 'Осенний парк и тёплое какао';
     await responsive.goto(base);
     await responsive.locator('.card').first().waitFor();
     assert.equal(await responsive.evaluate(()=>document.documentElement.scrollWidth),390);
-    await responsive.getByRole('button',{name:'Новый день'}).click();
+    await responsive.locator('#new').click();
     await responsive.locator('dialog[open]').waitFor();
     assert.deepEqual(errors,[]);
     console.log('PASS — five examples, file, direct audio and Spotify URL input, audio playback, gallery, reload, archive and mobile layout.');
   } finally {await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
-
-
-
-

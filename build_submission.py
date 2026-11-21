@@ -35,7 +35,7 @@ document.setFont("Body",18)
 document.drawString(46,682,"Интерактивный дневник ощущений")
 document.setStrokeColor(colors.HexColor("#8b8d7b"))
 document.line(46,656,549,656)
-style = ParagraphStyle("body",fontName="Body",fontSize=12,leading=18,textColor=colors.HexColor("#22261c"))
+style = ParagraphStyle("body",fontName="Body",fontSize=11,leading=16,textColor=colors.HexColor("#22261c"))
 y = 630
 for line in (out / "ABOUT.md").read_text(encoding="utf-8-sig").splitlines():
     if not line.startswith("**") or ".**" not in line:
@@ -44,7 +44,7 @@ for line in (out / "ABOUT.md").read_text(encoding="utf-8-sig").splitlines():
     paragraph = Paragraph(f"<b>{header}.</b> {body}",style)
     _,height = paragraph.wrap(503,650)
     paragraph.drawOn(document,46,y-height)
-    y -= height+18
+    y -= height+14
 assert y > 48, y
 document.setFont("Body",9)
 document.drawString(46,37,"ПРОТОТИП   /   19–22 НОЯБРЯ 2026")
@@ -108,4 +108,3 @@ with tempfile.TemporaryDirectory(dir=frames) as work:
         "-pix_fmt","yuv420p","-preset","fast","-crf","20",
         "-c:a","aac","-b:a","120k","-movflags","+faststart","-t",str(sum(timing)),
         str(out/"Sled-demo.mp4")],check=True)
-
