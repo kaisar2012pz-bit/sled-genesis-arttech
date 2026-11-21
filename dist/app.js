@@ -319,6 +319,7 @@ function render(){
   urls.forEach(URL.revokeObjectURL);
   urls=[];
   frame=0;
+  document.body.classList.add('ready');
   app.replaceChildren();
   const id=location.hash.startsWith('#day/')?location.hash.slice(5):null;
   currentDay=days.find(day=>day.id===id);
