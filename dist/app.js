@@ -300,7 +300,12 @@ function archive(){
 function detail(day){
   app.classList.remove('landing');
   const root=element('article','detail');
-  root.append(link('← Все дни','#archive','back'),scene(day,true));
+  const heading=element('header','day-heading');
+  heading.append(link('← Все воспоминания','#archive','back'),
+    element('p','label','ТВОЙ ДНЕВНИК · '+dateLabel(day.date)),
+    element('h1','','Один день. Целая история.'),
+    element('p','day-intro','Остановись на мгновение. Здесь остались свет, музыка и детали этого дня.'));
+  root.append(heading,scene(day,true));
   const info=element('div','info');
   const words=element('section','panel');
   words.append(element('h2','','Запись дня'),element('p','',day.story));
@@ -387,6 +392,13 @@ function detail(day){
   sound.append(disclosure);
   info.append(words,sound);
   root.append(info);
+  const outro=element('section','day-outro');
+  outro.append(element('p','label','ПРОДОЛЖЕНИЕ ИСТОРИИ'),
+    element('h2','','У каждого дня свой след.'));
+  const newDay=element('button','','Сохранить ещё один день');
+  newDay.onclick=()=>document.querySelector('#new').click();
+  outro.append(newDay,link('Вернуться к дневнику','#archive','back'));
+  root.append(outro);
   app.append(root);
 }
 
@@ -403,9 +415,18 @@ function render(){
   app.replaceChildren();
   const id=location.hash.startsWith('#day/')?location.hash.slice(5):null;
   currentDay=days.find(day=>day.id===id);
-  if(currentDay) detail(currentDay);
-  else archive();
-  window.scrollTo(0,0);
+  if(currentDay) {
+    detail(currentDay);
+    window.scrollTo(0,0);
+  } else {
+    archive();
+    const target=location.hash.slice(1);
+    if(['about','ritual','archive'].includes(target)) {
+      requestAnimationFrame(()=>document.getElementById(target)?.scrollIntoView());
+    } else {
+      window.scrollTo(0,0);
+    }
+  }
 }
 
 function validUrl(raw){
@@ -476,5 +497,6 @@ try{
   render();
 }catch(error){
   app.append(document.querySelector('#error').content.cloneNode(true));
+  document.body.classList.add('ready');
   console.error(error);
 }
