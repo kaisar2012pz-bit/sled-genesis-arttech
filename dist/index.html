@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Личный дневник, который превращает текст, снимки и музыку в атмосферу дня."><link rel="icon" href="data:,"><title>След — дневник ощущений</title><link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script></head>
+<body>
+<header class="shell top"><a class="brand" href="#archive"><span class="mark">◉</span> след<span class="dot">.</span></a><nav aria-label="Дневник"><a class="navlink" href="#archive">Архив</a><button id="new" type="button">＋ Новый день</button></nav></header>
+<main class="shell" id="app"></main>
+<dialog id="editor"><form id="entry">
+<div class="formtop"><div><p class="label">ДНЕВНИК</p><h2>Новый день</h2></div><button class="plain" id="close" type="button" aria-label="Закрыть">×</button></div>
+<label>Дата <input name="date" type="date" required></label>
+<label>Как прошёл день? <textarea name="story" rows="4" maxlength="4000" placeholder="Где вы были? Что запомнилось?" required></textarea></label>
+<label>Фотографии <input name="photos" type="file" accept="image/*" multiple required></label>
+<fieldset><legend>Песня дня</legend>
+<label>Аудиофайл <input name="audio" type="file" accept="audio/*"></label>
+<label>Или ссылка на песню (Spotify, аудиофайл или другой сервис) <input name="url" type="url" placeholder="https://…"></label>
+<label>Название, исполнитель или жанр <input name="track" maxlength="120" placeholder="Например, тихий джаз"></label>
+<label>Как звучит песня? <select name="energy"><option value="auto">Определить по аудио или описанию</option><option value="soft">Тихо и медленно</option><option value="mid">Ровно и спокойно</option><option value="fast">Ярко и энергично</option></select></label>
+</fieldset>
+<p id="message" role="status"></p><button id="submit">Собрать воспоминание →</button>
+</form></dialog>
+<template id="error"><p role="alert">Архив недоступен. Разрешите хранилище для этой страницы и обновите её.</p></template>
+</body></html>
+
+
